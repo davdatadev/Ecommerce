@@ -11,7 +11,7 @@ import websocket from './websocket.js';
 
 const app = express();
 
-const uri = 'mongodb://127.0.0.1:27017/entrega-final';
+const uri = 'mongodb://localhost:27017/demo-db';
 mongoose.connect(uri);
 
 //Handlebars Config
