@@ -46,9 +46,9 @@ router.post('/login', async (req, res) => {
         if (!email || !password) return res.status(400).send('Ingrese todos los datos')
         
         const user = await userModel.findOne({ email })
-        if (!user) return res.status(400).send({ status: 'error', message: 'Usuario no encontrado' })
+        if (!user) return res.status(400).send({ status: 'error', message: 'Credenciales incorrectas!' })
         
-        if (!isValidPassword(user, password)) return res.status(400).send({ status: 'error', message: 'Contraseña incorrecta' })
+        if (!isValidPassword(user, password)) return res.status(400).send({ status: 'error', message: 'Credenciales incorrectas!' })
         
         const tokenUser = {
             first_name: user.first_name,
@@ -59,13 +59,13 @@ router.post('/login', async (req, res) => {
         }
 
         const token = jwt.sign(tokenUser, 
-            constants.JWT_SECRET,  // process.env.SECRET
+            constants.JWT_SECRET,  // process.env.SECRET más dotenv
             { expiresIn: '1h' }
         )
 
         res.cookie(constants.JWT_COOKIE_NAME, token, {
             maxAge: 60 * 60 * 1000, // 1 hora
-            httpOnly: true
+            httpOnly: true // Solo accesible desde el servidor
         }).json({
             usuarioLogueado: user,
         });
@@ -75,10 +75,16 @@ router.post('/login', async (req, res) => {
     }
 })
 
+// Current para probar el jwt y obtener los datos del usuario logueado
+router.get('/current', 
+    passport.authenticate('jwt', { session: false }), 
+    (req, res) => {
+    res.send(req.user)
+})
+
 // Logout
 router.get('/logout', (req, res) => {
-    res.clearCookie(constants.JWT_COOKIE_NAME).send({ status: 'success', message: 'Usuario deslogueado' })
-    res.redirect('/login')    
+    res.clearCookie(constants.JWT_COOKIE_NAME).send({ status: 'success', message: 'Usuario deslogueado' })  
     }
 )
 

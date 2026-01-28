@@ -17,15 +17,18 @@ const cookieExtractor = req => {
 }
 
 export const initializePassport =()=>{
-    passport.use('jwt', new JWTStrategy({
-            secretOrKey: constants.JWT_SECRET,
-            jwtFromRequest: ExtractJWT.fromExtractors([cookieExtractor])
-        }, async (usuario, done) => {
-            try {
-                return done(null, usuario) // usuario es el jwt_payload del token
-            } catch (error) {
-                return done(error)
-            }
-        }
-    ))
+    passport.use('jwt',
+                new JWTStrategy({ // Estrategia JWT se usa para proteger rutas
+                    secretOrKey: constants.JWT_SECRET,
+                    jwtFromRequest: ExtractJWT.fromExtractors([cookieExtractor])
+                },
+                async (usuario, done) => {
+                    try {
+                        return done(null, usuario) // usuario es el jwt_payload del token
+                    } catch (error) {
+                        return done(error)
+                    }
+                }
+                )
+            )
 }
