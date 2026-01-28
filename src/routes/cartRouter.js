@@ -8,6 +8,7 @@ const router = Router();
 const ProductService = new productDBManager();
 const CartService = new cartDBManager(ProductService);
 
+// Get cart by ID
 router.get('/:cid',
     passport.authenticate('jwt', { session: false }),
     async (req, res) => {
@@ -26,6 +27,7 @@ router.get('/:cid',
     }
 });
 
+// Create new cart
 router.post('/', async (req, res) => {
 
     try {

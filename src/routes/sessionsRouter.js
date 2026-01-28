@@ -5,8 +5,10 @@ import jwt from 'jsonwebtoken'
 import userModel from '../dao/models/userModel.js'
 import { createHash, isValidPassword } from '../utils/crypt.js'
 import { constants } from '../utils/constantsUtil.js'
+import { cartDBManager } from '../dao/cartDBManager.js'
 
 const router = Router()
+const CartService = new cartDBManager();
 
 router.post('/registro', async (req, res) => {
     const { first_name, last_name, email, age, password } = req.body
@@ -62,7 +64,7 @@ router.post('/login', async (req, res) => {
         )
 
         res.cookie(constants.JWT_COOKIE_NAME, token, {
-            maxAge: 60 * 60 * 24,
+            maxAge: 60 * 60 * 1000, // 1 hora
             httpOnly: true
         }).json({
             usuarioLogueado: user,
@@ -72,5 +74,12 @@ router.post('/login', async (req, res) => {
         res.status(500).send({ status: 'error', message: error.message })
     }
 })
+
+// Logout
+router.get('/logout', (req, res) => {
+    res.clearCookie(constants.JWT_COOKIE_NAME).send({ status: 'success', message: 'Usuario deslogueado' })
+    res.redirect('/login')    
+    }
+)
 
 export default router
