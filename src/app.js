@@ -15,8 +15,10 @@ import websocket from './websocket.js';
 
 const app = express();
 
-const uri = 'mongodb://localhost:27017/demo-db';
-mongoose.connect(uri);
+const uri = "mongodb+srv://coderhouse_teacher:XS7ToHN00UWBnACA@cluster0.4dcctnp.mongodb.net/demo-db";
+mongoose.connect(uri)
+    .then(() => console.log("Conectado a la base de datos"))
+    .catch(error => console.error("Error en la conexión:", error))
 
 //Handlebars Config
 app.engine('handlebars', handlebars.engine());
