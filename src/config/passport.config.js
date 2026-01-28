@@ -1,6 +1,8 @@
 import passport from "passport"
 import passportJWT from "passport-jwt"
 
+import { constants } from '../utils/constantsUtil.js'
+
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
 
@@ -16,7 +18,7 @@ const cookieExtractor = req => {
 
 export const initializePassport =()=>{
     passport.use('jwt', new JWTStrategy({
-            secretOrKey: 'CoderCoder123',
+            secretOrKey: constants.JWT_SECRET,
             jwtFromRequest: ExtractJWT.fromExtractors([cookieExtractor])
         }, async (usuario, done) => {
             try {
