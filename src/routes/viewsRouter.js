@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { productDBManager } from '../dao/productDBManager.js';
 import { cartDBManager } from '../dao/cartDBManager.js';
+import { constants } from '../utils/constantsUtil.js';
 
 const router = Router();
 const ProductService = new productDBManager();
@@ -60,6 +61,17 @@ router.get('/cart/:cid', async (req, res) => {
             products: JSON.parse(JSON.stringify(response.products))
         }
     )
+});
+
+router.get('/login', (req, res) => {
+    if(req.cookies[constants.JWT_COOKIE_NAME]) {
+        return res.redirect('/products');
+    }
+
+    res.render('login', {
+        title: 'Login',
+        style: 'login.css'
+    });
 });
 
 export default router;

@@ -18,7 +18,7 @@ router.post('/registro', async (req, res) => {
             return res.status(400).send({ status: 'error', message: 'El usuario ya existe' })
         }
 
-        // Crear carrito nuevo
+        const newCart = await CartService.createCart();
 
         const user = {
             first_name,
@@ -26,7 +26,7 @@ router.post('/registro', async (req, res) => {
             email,
             age,
             password: createHash(password),
-            cart: null, // Asignar el id del carrito creado cart._id
+            cart: newCart._id,
             role: 'user'
         }
 
