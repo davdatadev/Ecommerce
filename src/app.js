@@ -10,13 +10,14 @@ import productRouter from './routes/productRouter.js';
 import cartRouter from './routes/cartRouter.js';
 import viewsRouter from './routes/viewsRouter.js';
 import sessionsRouter from './routes/sessionsRouter.js';
-import __dirname from './utils/constantsUtil.js';
+import __dirname, { constants } from './utils/constantsUtil.js';
 import websocket from './websocket.js';
 
 const app = express();
 
-const uri = "mongodb+srv://coderhouse_teacher:XS7ToHN00UWBnACA@cluster0.4dcctnp.mongodb.net/demo-db";
-mongoose.connect(uri)
+const MONGO_URL = constants.MONGO_URL
+
+mongoose.connect(MONGO_URL)
     .then(() => console.log("Conectado a la base de datos"))
     .catch(error => console.error("Error en la conexión:", error))
 
@@ -41,7 +42,7 @@ app.use('/api/carts', cartRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/', viewsRouter);
 
-const PORT = 8080;
+const PORT = constants.PORT;
 const httpServer = app.listen(PORT, () => {
     console.log(`Start server in PORT ${PORT}`);
 });
