@@ -1,137 +1,47 @@
 import { Router } from 'express';
 import passport from 'passport';
-import { productDBManager } from '../dao/productDBManager.js';
-import { cartDBManager } from '../dao/cartDBManager.js';
 import { auth } from '../middlewares/auth.js';
+import * as cartController from '../controllers/cart.controller.js';
 
 const router = Router();
-const ProductService = new productDBManager();
-const CartService = new cartDBManager(ProductService);
 
 // Get cart by ID
 router.get('/:cid',
     passport.authenticate('jwt', { session: false }),
-    async (req, res) => {
-
-    try {
-        const result = await CartService.getProductsFromCartByID(req.params.cid);
-        res.send({
-            status: 'success',
-            payload: result
-        });
-    } catch (error) {
-        res.status(400).send({
-            status: 'error',
-            message: error.message
-        });
-    }
-});
+    cartController.getCart
+);
 
 // Create new cart
-router.post('/', async (req, res) => {
-
-    try {
-        const result = await CartService.createCart();
-        res.send({
-            status: 'success',
-            payload: result
-        });
-    } catch (error) {
-        res.status(400).send({
-            status: 'error',
-            message: error.message
-        });
-    }
-});
+router.post('/', cartController.createCart);
 
 // Add product to cart
 router.post('/:cid/product/:pid',
     passport.authenticate('jwt', { session: false }),
-    async (req, res) => {
+    auth('user'),
+    cartController.addProductToCart
+);
 
-    try {
-        const result = await CartService.addProductByID(req.params.cid, req.params.pid)
-        res.send({
-            status: 'success',
-            payload: result
-        });
-    } catch (error) {
-        res.status(400).send({
-            status: 'error',
-            message: error.message
-        });
-    }
-});
+router.put('/:cid', 
+    passport.authenticate('jwt', { session: false }),
+    auth('user'),
+    cartController.updateCart
+);
+
+router.put('/:cid/product/:pid', 
+    passport.authenticate('jwt', { session: false }),
+    auth('user'),
+    cartController.updateProductQuantity
+);
 
 router.delete('/:cid/product/:pid',
     passport.authenticate('jwt', { session: false }),
-    async (req, res) => {
-
-    try {
-        const result = await CartService.deleteProductByID(req.params.cid, req.params.pid)
-        res.send({
-            status: 'success',
-            payload: result
-        });
-    } catch (error) {
-        res.status(400).send({
-            status: 'error',
-            message: error.message
-        });
-    }
-});
-
-router.put('/:cid',
-    passport.authenticate('jwt', { session: false }),
-    auth('admin'),
-    async (req, res) => {
-
-    try {
-        const result = await CartService.updateAllProducts(req.params.cid, req.body.products)
-        res.send({
-            status: 'success',
-            payload: result
-        });
-    } catch (error) {
-        res.status(400).send({
-            status: 'error',
-            message: error.message
-        });
-    }
-});
-
-router.put('/:cid/product/:pid', async (req, res) => {
-
-    try {
-        const result = await CartService.updateProductByID(req.params.cid, req.params.pid, req.body.quantity)
-        res.send({
-            status: 'success',
-            payload: result
-        });
-    } catch (error) {
-        res.status(400).send({
-            status: 'error',
-            message: error.message
-        });
-    }
-});
+    cartController.deleteProductFromCart
+);
 
 router.delete('/:cid',
     passport.authenticate('jwt', { session: false }),
-    async (req, res) => {
-
-    try {
-        const result = await CartService.deleteAllProducts(req.params.cid)
-        res.send({
-            status: 'success',
-            payload: result
-        });
-    } catch (error) {
-        res.status(400).send({
-            status: 'error',
-            message: error.message
-        });
-    }
-});
+    auth('user'),
+    cartController.clearCart
+);
 
 export default router;
