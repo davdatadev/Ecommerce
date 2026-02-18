@@ -21,6 +21,12 @@ router.post('/:cid/product/:pid',
     cartController.addProductToCart
 );
 
+router.post('/:cid/purchase',
+    passport.authenticate('jwt', { session: false }),
+    auth('user'),
+    cartController.purchaseCart
+);
+
 router.put('/:cid', 
     passport.authenticate('jwt', { session: false }),
     auth('user'),

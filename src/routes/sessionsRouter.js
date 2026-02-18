@@ -6,6 +6,7 @@ import userModel from '../dao/models/userModel.js'
 import { createHash, isValidPassword } from '../utils/crypt.js'
 import { constants } from '../utils/constantsUtil.js'
 import { cartDBManager } from '../dao/cartDBManager.js'
+import UserDTO from '../dtos/user.dto.js'
 
 const router = Router()
 const CartService = new cartDBManager();
@@ -50,16 +51,10 @@ router.post('/login', async (req, res) => {
         
         if (!isValidPassword(user, password)) return res.status(400).send({ status: 'error', message: 'Credenciales incorrectas!' })
         
-        const tokenUser = {
-            first_name: user.first_name,
-            last_name: user.last_name,
-            email: user.email,
-            role: user.role,
-            cart: user.cart
-        }
+        const userDTO = new UserDTO(user);
 
-        const token = jwt.sign(tokenUser, 
-            constants.JWT_SECRET,  // process.env.SECRET más dotenv
+        const token = jwt.sign({...userDTO}, 
+            constants.JWT_SECRET,
             { expiresIn: '1h' }
         )
 
@@ -67,7 +62,7 @@ router.post('/login', async (req, res) => {
             maxAge: 60 * 60 * 1000, // 1 hora
             httpOnly: true // Solo accesible desde el servidor
         }).json({
-            usuarioLogueado: user,
+            usuarioLogueado: userDTO,
         });
 
     } catch (error) {
@@ -79,7 +74,8 @@ router.post('/login', async (req, res) => {
 router.get('/current', 
     passport.authenticate('jwt', { session: false }), 
     (req, res) => {
-    res.send(req.user)
+        const userDTO = new UserDTO(req.user)
+        res.send(userDTO)
 })
 
 // Logout
