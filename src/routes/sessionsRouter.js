@@ -7,6 +7,7 @@ import { createHash, isValidPassword } from '../utils/crypt.js'
 import { constants } from '../utils/constantsUtil.js'
 import { cartDBManager } from '../dao/cartDBManager.js'
 import UserDTO from '../dtos/user.dto.js'
+import { sendRecoveryMail } from '../utils/mailUtil.js'
 
 const router = Router()
 const CartService = new cartDBManager();
@@ -83,5 +84,48 @@ router.get('/logout', (req, res) => {
     res.clearCookie(constants.JWT_COOKIE_NAME).send({ status: 'success', message: 'Usuario deslogueado' })  
     }
 )
+
+
+router.post('/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    try {
+        const user = await userModel.findOne({ email });
+        if (!user) return res.status(404).send({ status: 'error', message: 'Usuario no encontrado' });
+
+        const token = jwt.sign({ email }, constants.JWT_SECRET, { expiresIn: '1h' })
+
+        await sendRecoveryMail(email, token)
+
+        res.send({ status: 'success', message: 'Correo de recuperación enviado' });
+    } catch (error) {
+        res.status(500).send({ status: 'error', message: error.message });
+    }
+})
+
+
+router.post('/reset-password', async (req, res) => {
+    const { token, newPassword } = req.body;
+    try {
+        // Verifico el token y obtengo el email del usuario
+        const decodedUser = jwt.verify(token, constants.JWT_SECRET);
+        const user = await userModel.findOne({ email: decodedUser.email });
+        if (!user) return res.status(404).send({ status: 'error', message: 'Usuario no encontrado' });
+
+        if (isValidPassword(user, newPassword)) {
+            return res.status(400).send({ status: 'error', message: 'No puedes usar la misma contraseña anterior' });
+        }
+
+        user.password = createHash(newPassword);
+        await user.updateOne(user);
+
+        res.send({ status: 'success', message: 'Contraseña actualizada correctamente' });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            return res.status(400).send({ status: 'error', message: 'El token ha expirado. Solicita uno nuevo.' });
+        }
+        res.status(500).send({ status: 'error', message: error.message });
+    }
+
+})
 
 export default router

@@ -78,4 +78,23 @@ router.get('/login', (req, res) => {
     });
 });
 
+router.get('/forgot-password', (req, res) => {
+    res.render('forgotPassword', {
+        title: 'Recuperar Contraseña',
+        style: 'index.css'
+    });
+})
+
+router.get('/reset-password', (req, res) => {
+    const token = req.query.token;
+    
+    if (!token) return res.redirect('/login');
+
+    res.render('resetPassword', {
+        title: 'Restablecer Contraseña',
+        style: 'index.css',
+        token: token // Hay que pasar el token a la vista para que el formulario lo incluya al hacer submit
+    });
+})
+
 export default router;

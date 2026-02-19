@@ -12,7 +12,9 @@ export const constants = {
     PORT: process.env.PORT || 8080,
     MONGO_URL: process.env.MONGO_URL,
     JWT_SECRET: process.env.JWT_SECRET || 'SecretKeyDefault',
-    JWT_COOKIE_NAME: process.env.JWT_COOKIE_NAME || 'cookieToken'
+    JWT_COOKIE_NAME: process.env.JWT_COOKIE_NAME || 'cookieToken',
+    MAIL_USER: process.env.MAIL_USER,
+    MAIL_PASSWORD: process.env.MAIL_PASSWORD
 }
 
 export default __dirname;
