@@ -2,17 +2,22 @@ import { Router } from 'express';
 import { productDBManager } from '../dao/productDBManager.js';
 import { cartDBManager } from '../dao/cartDBManager.js';
 import { constants } from '../utils/constantsUtil.js';
+import ProductRepository from '../repositories/product.repository.js';
+import CartRepository from '../repositories/cart.repository.js';
 
 const router = Router();
-const ProductService = new productDBManager();
-const CartService = new cartDBManager(ProductService);
+const productDAO = new productDBManager();
+const productService = new ProductRepository(productDAO);
+
+const cartDAO = new cartDBManager(productDAO); 
+const cartService = new CartRepository(cartDAO);
 
 router.get('/', (req, res) => {
     res.send('Welcome to the Home Page')
 })
 
 router.get('/products', async (req, res) => {
-    const products = await ProductService.getAllProducts(req.query);
+    const products = await productService.getAllProducts(req.query);
 
     res.render(
         'index',
@@ -33,7 +38,7 @@ router.get('/products', async (req, res) => {
 });
 
 router.get('/realtimeproducts', async (req, res) => {
-    const products = await ProductService.getAllProducts(req.query);
+    const products = await productService.getAllProducts(req.query);
     res.render(
         'realTimeProducts',
         {
@@ -45,27 +50,25 @@ router.get('/realtimeproducts', async (req, res) => {
 });
 
 router.get('/cart/:cid', async (req, res) => {
-    const response = await CartService.getProductsFromCartByID(req.params.cid);
-
-    if (response.status === 'error') {
-        return res.render(
-            'notFound',
-            {
-                title: 'Not Found',
-                style: 'index.css'
-            }
-        );
-    }
-
-    res.render(
-        'cart',
-        {
-            title: 'Carrito',
-            style: 'index.css',
-            products: JSON.parse(JSON.stringify(response.products))
+    try {
+        const cid = req.params.cid;
+        const cart = await cartService.getProductsFromCartByID(cid);
+        
+        if (!cart) {
+            return res.render('notFound', { title: 'Carrito no encontrado', style: 'index.css' });
         }
-    )
-});
+
+        res.render('cart', {
+            title: 'Tu Carrito',
+            style: 'index.css',
+            cid: cid,
+            products: JSON.parse(JSON.stringify(cart.products))
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).render('error', { error: 'Error al cargar el carrito' });
+    }
+})
 
 router.get('/login', (req, res) => {
     if(req.cookies[constants.JWT_COOKIE_NAME]) {

@@ -1,15 +1,62 @@
 <div class="box">
-    <div class="view-products"><a id="button-products" class="button" href="/products">Volver</a></div>
-    <h1>Productos</h1>
-    <div class="products-box">
-        {{#each products}}
-            <div class="product-card">
-                <h3>{{this.product.title}}</h3>
-                <hr>
-                <p>Categoria: {{this.product.category}}</p>
-                <p>Precio: $ {{this.product.price}}</p>
-                <p>Cantidad: {{this.quantity}}</p>
-            </div>
-        {{/each}}
+    <div class="view-products">
+        <a id="button-products" class="button" href="/products">Volver a Productos</a>
     </div>
+    
+    <h1>Tu Carrito</h1>
+
+    {{#if products.length}}
+        <div class="products-box">
+            {{#each products}}
+                <div class="product-card">
+                    <h3>{{this.product.title}}</h3>
+                    <hr>
+                    <p>Categoría: {{this.product.category}}</p>
+                    <p>Precio: $ {{this.product.price}}</p>
+                    <p>Cantidad: {{this.quantity}}</p>
+                </div>
+            {{/each}}
+        </div>
+
+        <div class="purchase-section" style="margin-top: 20px; text-align: center;">
+            <button onclick="finalizarCompra('{{cid}}')" class="button-purchase" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Finalizar Compra
+            </button>
+        </div>
+    
+    {{else}}
+        <div style="text-align: center; margin-top: 50px;">
+            <p>Tu carrito está vacío</p>
+            <a href="/products">Ir a comprar</a>
+        </div>
+    {{/if}}
 </div>
+
+<script>
+    async function finalizarCompra(cid) {
+        try {
+            const response = await fetch(`/api/carts/${cid}/purchase`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if(response.ok && data.status === 'success') {
+                if(data.ticket) {
+                    alert(`¡Compra exitosa! \nTicket: ${data.ticket.code} \nMonto: $${data.ticket.amount}`);
+                } else {
+                    alert('No se pudo procesar la compra (quizás no había stock de ningún producto).');
+                }
+                location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Error desconocido'));
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error de conexión');
+        }
+    }
+</script>

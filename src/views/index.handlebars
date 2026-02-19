@@ -1,18 +1,27 @@
 <div class="box">
-    <div class="view-cart"><a id="button-cart" class="button">Ver Carrito</a></div>
+    <div class="view-cart">
+        {{#if user}}
+            <a id="button-cart" class="button" href="/cart/{{user.cart}}">Ver Carrito ({{user.role}})</a>
+        {{else}}
+            <a id="button-cart" class="button" href="/login">Iniciar Sesión</a>
+        {{/if}}
+    </div>
+
     <h1>Productos</h1>
+    
     <div class="products-box">
         {{#each products}}
             <div class="product-card">
                 <h3>{{this.title}}</h3>
                 <hr>
-                <p>Categoria: {{this.category}}</p>
+                <p>Categoría: {{this.category}}</p>
                 <p>Descripción: {{this.description}}</p>
                 <p>Precio: $ {{this.price}}</p>
                 <button id="button-create" onclick="addToCart('{{this._id}}')">Agregar al Carrito</button>
             </div>
         {{/each}}
     </div>
+
     <div class="footer">
         {{#if prevLink.exist}}
             <a id="button-paginate" class="button" href="{{prevLink.link}}">Anterior</a>
@@ -23,4 +32,35 @@
     </div>
 </div>
 
-<script src="/js/ecommerce.js"></script>
+<script>
+    const cartId = "{{user.cart}}";
+
+    async function addToCart(pid) {
+        if (!cartId || cartId === "undefined") {
+            alert("Debes iniciar sesión para comprar");
+            return window.location.href = "/login";
+        }
+
+        try {
+
+            const response = await fetch(`/api/carts/${cartId}/product/${pid}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert("¡Producto agregado al carrito! 🛒");
+            } else {
+                alert("Error: " + (data.message || "No se pudo agregar"));
+                console.error(data);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Error de conexión");
+        }
+    }
+</script>

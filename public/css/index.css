@@ -59,10 +59,10 @@ button, .button {
 }
 
 .view-cart {
-    display: none;
+    display: block;
     position: absolute;
     right: 10px;
-    top: 15px;
+    top: 10px;
 }
 
 .view-products {

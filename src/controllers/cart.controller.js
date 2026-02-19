@@ -36,6 +36,9 @@ export const createCart = async (req, res) => {
 
 export const addProductToCart = async (req, res) => {
     try {
+        console.log("🔍 DEBUG CARRITO:");
+        console.log("ID en el Token (req.user.cart):", req.user.cart);
+        console.log("ID en la URL (req.params.cid):", req.params.cid);
         if (req.user.cart.toString() !== req.params.cid) {
             return res.status(403).send({ status: 'error', message: 'No puedes agregar productos a un carrito que no es tuyo' });
         }
@@ -110,7 +113,7 @@ export const purchaseCart = async (req, res) => {
             const ticketData = {
                 code: `ACDC-${Date.now()}`,
                 amount: totalAmount,
-                purcharser: req.user.email
+                purchaser: req.user.email
             }
             ticket = await ticketService.createTicket(ticketData);
         }

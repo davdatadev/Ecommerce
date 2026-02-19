@@ -4,6 +4,7 @@ import {Server} from 'socket.io';
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import passport from 'passport';
+import jwt from 'jsonwebtoken'
 import { initializePassport } from './config/passport.config.js';
 
 import productRouter from './routes/productRouter.js';
@@ -35,6 +36,25 @@ app.use(cookieParser());
 // Passport Middleware
 initializePassport();
 app.use(passport.initialize());
+
+app.use((req, res, next) => {
+    const token = req.cookies[constants.JWT_COOKIE_NAME];
+    if (token) {
+        try {
+            const user = jwt.verify(token, constants.JWT_SECRET);
+            res.locals.user = user; // Inyectamos el usuario en las vistas
+            res.locals.isLoggedIn = true;
+            res.locals.isAdmin = user.role === 'admin'; // Utilidad extra por si la necesitas
+        } catch (error) {
+            res.locals.user = null;
+            res.locals.isLoggedIn = false;
+        }
+    } else {
+        res.locals.user = null;
+        res.locals.isLoggedIn = false;
+    }
+    next();
+})
 
 //Routers
 app.use('/api/products', productRouter);
