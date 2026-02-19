@@ -14,7 +14,7 @@ export const sendRecoveryMail = async (userEmail, token) => {
     const link = `http://localhost:${constants.PORT}/reset-password?token=${token}`;
 
     return await transport.sendMail({
-        from: 'E-commerce <davdatadevtest@gmail.com>',
+        from: `E-commerce <${constants.MAIL_USER}>`,
         to: userEmail,
         subject: 'Recuperación de Contraseña',
         html: `
